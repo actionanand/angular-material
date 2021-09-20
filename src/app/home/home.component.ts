@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
 
     ngOnInit() {
 
-        const courses:any = Object.values(COURSES);
+        const courses = <any>Object.values(COURSES);
 
         this.beginnerCourses = courses.filter(course => course.category === 'BEGINNER');
 
