@@ -22,6 +22,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
     displayedColumns = ['seqNo', 'description', 'duration'];
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatSort) sort: MatSort;
 
     constructor(private route: ActivatedRoute,
                 private coursesServ: CoursesService) {
@@ -32,6 +33,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
         this.course = this.route.snapshot.data["course"];
         this.dataSource = new LessonsDataSource(this.coursesServ);
+        this.dataSource.loadLessons(this.course.id, '', 'asc', 0, 3);
     }
 
     // searchLessons(search = '') {
@@ -39,11 +41,14 @@ export class CourseComponent implements OnInit, AfterViewInit {
     // }
 
     ngAfterViewInit() {
-      this.paginator.page.
-      pipe(
+      // changing page index as 0 when sorting happens
+      this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+      // trigerring call for both sort and page change
+      merge(this.sort.sortChange, this.paginator.page)
+      .pipe(
         startWith(<string>null),
         tap(() => {
-          this.dataSource.loadLessons(this.course.id, '', 'asc', this.paginator.pageIndex, this.paginator.pageSize);
+          this.dataSource.loadLessons(this.course.id, '', this.sort.direction, this.paginator.pageIndex, this.paginator.pageSize);
         })
       )
       .subscribe();
