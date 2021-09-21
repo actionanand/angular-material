@@ -23,6 +23,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
+    @ViewChild('input') input: ElementRef;
 
     constructor(private route: ActivatedRoute,
                 private coursesServ: CoursesService) {
@@ -41,17 +42,39 @@ export class CourseComponent implements OnInit, AfterViewInit {
     // }
 
     ngAfterViewInit() {
+      // converting normal event to observable (viewchild) and fitering
+      fromEvent(this.input.nativeElement, 'keyup')
+        .pipe(
+          debounceTime(150),
+          distinctUntilChanged(),
+          tap(() => {
+            this.paginator.pageIndex = 0;
+            this.loadLessonPage();
+          })
+        ).subscribe();
+
       // changing page index as 0 when sorting happens
       this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+
       // trigerring call for both sort and page change
       merge(this.sort.sortChange, this.paginator.page)
       .pipe(
         startWith(<string>null),
         tap(() => {
-          this.dataSource.loadLessons(this.course.id, '', this.sort.direction, this.paginator.pageIndex, this.paginator.pageSize);
+          this.loadLessonPage();
         })
       )
       .subscribe();
+    }
+
+    loadLessonPage() {
+      this.dataSource.loadLessons(
+        this.course.id, 
+        this.input.nativeElement.value, 
+        this.sort.direction, 
+        this.paginator.pageIndex, 
+        this.paginator.pageSize
+      );
     }
 
 
