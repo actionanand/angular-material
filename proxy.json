@@ -2,5 +2,14 @@
   "/api": {
     "target": "http://localhost:9000",
     "secure": false
+  },
+  "/otherUrl/api/*": {
+    "target": "http://localhost:9000",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/otherUrl/api": "/api"
+    }
   }
 }
